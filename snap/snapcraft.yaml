@@ -1,5 +1,5 @@
 name: theia-ide
-version: 1.52.0
+version: 1.54.0
 license: EPL-2.0 AND GPL-2.0-with-classpath-exception AND MIT
 website: https://theia-ide.org/
 source-code: https://github.com/eclipse-theia
@@ -26,13 +26,11 @@ apps:
 
 parts:
   theia-ide:
-    source: https://download.eclipse.org/theia/ide/1.52.0/linux/TheiaIDE.deb
+    source: https://download.eclipse.org/theia/ide/1.54.0/linux/TheiaIDE.deb
     plugin: dump
     source-type: deb
     override-prime: |
       craftctl default
-      mkdir -p $SNAPCRAFT_PRIME/usr/share/icons/hicolor/512x512/apps/
-      mv $SNAPCRAFT_PRIME/usr/share/icons/hicolor/0x0/apps/theia-ide-electron-app.png $SNAPCRAFT_PRIME/usr/share/icons/hicolor/512x512/apps/theia-ide-electron-app.png
       sed -i -Ee 's|^Icon=(.*)$|Icon=/usr/share/icons/hicolor/512x512/apps/\1.png|' $SNAPCRAFT_PRIME/usr/share/applications/theia-ide-electron-app.desktop
     stage-packages:
       - libx11-6
