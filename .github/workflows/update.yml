@@ -1,0 +1,43 @@
+name: Update
+
+on:
+  schedule:
+    - cron: '48 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    name: Check Version
+    runs-on: ubuntu-latest
+    steps:
+     - name: Fetch latest version
+       id: latest
+       run: |
+         curl -L -o latest-linux.yml https://download.eclipse.org/theia/ide/latest/linux/latest-linux.yml
+         VERSION=$(yq eval '.version' latest-linux.yml)
+         echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+     - name: Checkout Repository
+       uses: actions/checkout@v4
+
+     - name: Update manifest
+       id: manifest
+       env:
+         GH_TOKEN: ${{ github.token }}
+       run: |
+         yq eval -i '.version = "${{ steps.latest.outputs.version }}"' snap/snapcraft.yaml
+         git add snap/snapcraft.yaml
+         git diff-index --exit-code HEAD || echo "changes=true" >> $GITHUB_OUTPUT
+
+     - name: Submit pull request
+       if: steps.manifest.outputs.changes == 'true'
+       env:
+         GH_TOKEN: ${{ github.token }}
+       run: |
+         git config --local user.email "actions@github.com"
+         git config --local user.name "GitHub Actions"
+         git commit -m "Update to version ${{ steps.latest.outputs.version }}"
+         git branch ${{ steps.latest.outputs.version }}
+         git checkout ${{ steps.latest.outputs.version }}
+         git push origin ${{ steps.latest.outputs.version }} --set-upstream
+         gh pr create --fill
