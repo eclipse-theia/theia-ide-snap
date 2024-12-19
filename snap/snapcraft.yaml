@@ -5,25 +5,20 @@ website: https://theia-ide.org/
 source-code: https://github.com/eclipse-theia
 donation: https://www.eclipse.org/sponsor/ide/
 summary: Eclipse Theia IDE
-description:
-  Open, Flexible and Extensible Cloud & Desktop IDE
-
+description: Open, Flexible and Extensible Cloud & Desktop IDE
 base: core24
 grade: stable
 confinement: classic
 compression: lzo
-
 platforms:
   amd64:
     build-on: amd64
     build-for: amd64
-
 apps:
   theia-ide:
     command: opt/TheiaIDE/theia-ide-electron-app
     desktop: usr/share/applications/theia-ide-electron-app.desktop
     common-id: theia-ide-electron-app.desktop
-
 parts:
   theia-ide:
     source: https://download.eclipse.org/theia/ide/${SNAPCRAFT_PROJECT_VERSION}/linux/TheiaIDE.deb
