@@ -26,6 +26,7 @@ jobs:
          GH_TOKEN: ${{ github.token }}
        run: |
          yq eval -i '.version = "${{ steps.latest.outputs.version }}"' snap/snapcraft.yaml
+         yq eval -i '.parts.theia-ide.source = "https://download.eclipse.org/theia/ide/${{ steps.latest.outputs.version }}/linux/TheiaIDE.deb"' snap/snapcraft.yaml
          git add snap/snapcraft.yaml
          git diff-index --exit-code HEAD || echo "changes=true" >> $GITHUB_OUTPUT
 
