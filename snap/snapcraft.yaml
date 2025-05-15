@@ -21,7 +21,7 @@ apps:
     common-id: theia-ide-electron-app.desktop
 parts:
   theia-ide:
-    source: https://download.eclipse.org/theia/ide/${SNAPCRAFT_PROJECT_VERSION}/linux/TheiaIDE.deb
+    source: https://download.eclipse.org/theia/ide/1.60.200/linux/TheiaIDE.deb
     plugin: dump
     source-type: deb
     override-prime: |
