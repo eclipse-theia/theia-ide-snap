@@ -25,23 +25,7 @@ jobs:
        env:
          GH_TOKEN: ${{ github.token }}
        run: |
-         # Debug: Check snap/snapcraft.yaml content before changes
-         echo "=== BEFORE CHANGES ==="
-         cat snap/snapcraft.yaml
-         
-         # Debug: Print the exact command being executed for first yq command
-         echo "=== EXECUTING FIRST YQ COMMAND ==="
-         echo "yq eval -i '.version = \"${{ steps.latest.outputs.version }}\"' snap/snapcraft.yaml"
-         
-         # First yq command
          yq eval -i '.version = "${{ steps.latest.outputs.version }}"' snap/snapcraft.yaml
-         
-         # Debug: Check if first command succeeded
-         if [ $? -eq 0 ]; then
-           echo "First yq command succeeded"
-         else
-           echo "First yq command failed with exit code $?"
-         fi
          
          # Debug: Print the exact command being executed for second yq command
          echo "=== EXECUTING SECOND YQ COMMAND ==="
@@ -52,7 +36,7 @@ jobs:
          yq eval '.parts.theia-ide.source' snap/snapcraft.yaml
          
          # Second yq command with error handling
-         yq eval -i '.parts.theia-ide.source = "https://download.eclipse.org/theia/ide/${{ steps.latest.outputs.version }}/linux/TheiaIDE.deb"' snap/snapcraft.yaml
+         yq eval -i '.parts.theia-ide.source = "https://download.eclipse.org/theia/ide/${{ steps.latest.outputs.version }}/linux/TheiaIDE.deb/test"' snap/snapcraft.yaml
          YQ_EXIT_CODE=$?
          
          if [ $YQ_EXIT_CODE -ne 0 ]; then
