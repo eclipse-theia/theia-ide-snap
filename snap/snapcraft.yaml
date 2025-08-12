@@ -1,5 +1,5 @@
 name: theia-ide
-version: 1.63.300
+version: 1.64.100
 license: EPL-2.0 AND GPL-2.0-with-classpath-exception AND MIT
 website: https://theia-ide.org/
 source-code: https://github.com/eclipse-theia
@@ -21,7 +21,7 @@ apps:
     common-id: theia-ide-electron-app.desktop
 parts:
   theia-ide:
-    source: https://download.eclipse.org/theia/ide/1.63.300/linux/TheiaIDE.deb
+    source: https://download.eclipse.org/theia/ide/1.64.100/linux/TheiaIDE.deb
     plugin: dump
     source-type: deb
     override-prime: |
