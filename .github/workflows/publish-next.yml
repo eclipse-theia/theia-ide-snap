@@ -1,0 +1,71 @@
+name: Store Publishing (Next)
+
+on:
+  schedule:
+    # Weekdays, roughly an hour after the upstream next build is published.
+    - cron: '30 3 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Publish even if the latest next build is not from today'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve Next Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+      publish: ${{ steps.next.outputs.publish }}
+    steps:
+      - name: Resolve next version
+        id: next
+        env:
+          METADATA_URL: https://github.com/eclipse-theia/theia-ide/releases/download/next/latest-linux.yml
+          FORCE: ${{ inputs.force }}
+        run: |
+          curl -fsSL -o latest-linux.yml "$METADATA_URL"
+          VERSION=$(yq eval '.version' latest-linux.yml)
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Could not resolve the Theia IDE Next version from $METADATA_URL" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Upstream stamps the build date into the version, e.g. 1.76.0-next-2026-09-09.
+          # Without a build from today there is nothing new to publish.
+          if [ "${VERSION#*-next-}" = "$(date -u +%Y-%m-%d)" ] || [ "$FORCE" = "true" ]; then
+            echo "publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "publish=false" >> $GITHUB_OUTPUT
+            echo "::notice::Latest Theia IDE Next build is $VERSION, not from today. Nothing to publish."
+          fi
+
+  publish:
+    name: Publish to the Snap Store
+    needs: resolve
+    if: needs.resolve.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Stamp next version
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: yq eval -i '.version = strenv(VERSION)' next/snap/snapcraft.yaml
+
+      - uses: snapcore/action-build@3bdaa03e1ba6bf59a65f84a751d943d549a54e79 # 1.3.0
+        id: build
+        with:
+          path: next
+
+      - uses: snapcore/action-publish@214b86e5ca036ead1668c79afb81e550e6c54d40 # 1.2.0
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable,edge
